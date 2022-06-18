@@ -1,0 +1,55 @@
+---
+name: terraform-apply
+description: Terraform Validation and Plan
+
+inputs:
+  working-directory:
+    description: Working Directory
+    required: false
+    default: "./"
+  terraform-version:
+    description: Terraform version
+    default: "1.2.3"
+    required: false
+  default-branch:
+    description: Target default branch
+    default: "main"
+    required: false
+  google-service-account:
+    description: Google Service Account
+    required: true
+  google-workload-identity-provider:
+    description: Google Workload Identity Provider
+    required: true
+
+runs:
+  using: composite
+  steps:
+  - uses: hashicorp/setup-terraform@v1
+    with:
+      terraform_version: ${{ inputs.terraform-version  }}
+
+  - id: auth
+    uses: 'google-github-actions/auth@v0'
+    with:
+      workload_identity_provider: ${{ inputs.google-workload-identity-provider  }}
+      service_account: ${{ inputs.google-service-account  }}
+      access_token_lifetime: '300s'
+
+  - name: 'Terraform Init'
+    shell: bash
+    id: init
+    working-directory: ${{ inputs.working-directory  }}
+    run: terraform init
+
+  - name: 'Terraform Validate'
+    shell: bash
+    id: validate
+    working-directory: ${{ inputs.working-directory  }}
+    run: terraform validate
+
+  - name: Terraform Plan
+    shell: bash
+    id: plan
+    working-directory: ${{ inputs.working-directory  }}
+    run: terraform apply -auto-approve
