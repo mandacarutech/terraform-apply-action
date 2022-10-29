@@ -21,6 +21,14 @@ inputs:
   google-workload-identity-provider:
     description: Google Workload Identity Provider
     required: true
+  initFlags:
+    description: Init flags
+    default: ""
+    required: false
+  provisioningFlags:
+    description: Provisioning Flags
+    default: ""
+    required: false
 
 runs:
   using: composite
@@ -40,7 +48,7 @@ runs:
     shell: bash
     id: init
     working-directory: ${{ inputs.working-directory  }}
-    run: terraform init
+    run: terraform init ${{ inputs.initFlags}}
 
   - name: 'Terraform Validate'
     shell: bash
@@ -52,4 +60,4 @@ runs:
     shell: bash
     id: plan
     working-directory: ${{ inputs.working-directory  }}
-    run: terraform apply -auto-approve
+    run: terraform apply -auto-approve ${{ inputs.provisioningFlags}}
